@@ -10,7 +10,6 @@
     }
 
     class Menu
-
     {
         public static int MesagePositionY = 4;
         private const string FishAdd = "1";
@@ -38,7 +37,6 @@
                 Console.SetCursorPosition(0, fishesListPositionY);
                 CleanConsoleBelowLine();
                 aquarium.ShowAllFishes();
-
                 userInput = Console.ReadLine();
 
                 switch (userInput)
@@ -94,8 +92,6 @@
 
         public void AddFish()
         {
-            
-
             if (_fishes.Count <= _capacity)
             {
                 _fishes.Add(new Fish());
@@ -115,8 +111,10 @@
         {
             string userInput;
             int indexFromUser;
+
             Console.SetCursorPosition(0, Menu.MesagePositionY);
             Console.Write("Enter index to remove fish: ");
+
             userInput = Console.ReadLine();
             indexFromUser = Convert.ToInt32(userInput);
 
