@@ -12,6 +12,7 @@
     class Menu
 
     {
+        public static int MesagePositionY = 4;
         private const string FishAdd = "1";
         private const string FishRemove = "2";
         private const string CycleStep = "3";
@@ -38,28 +39,23 @@
                 CleanConsoleBelowLine();
                 aquarium.ShowAllFishes();
 
-                //Console.SetCursorPosition(0, cardTrayPositionY);
-                //_player.ShowHand();
-                //Console.SetCursorPosition(0, dealerMessagePositionY);
-                //_dealer.DecideWin(_player.CountScore());
-                //Console.SetCursorPosition(0, scorePositionY);
-                //Console.Write(_player.Name);
-                //_player.DisplayScore(_player.CountScore());
-                //Console.SetCursorPosition(0, gameMenuPositionY);
-
                 userInput = Console.ReadLine();
 
                 switch (userInput)
                 {
                     case FishAdd:
+                        CleanMesageString();
                         aquarium.AddFish();
+                        CleanMesageString();
                         break;
 
                     case FishRemove:
+                        CleanMesageString();
                         aquarium.RemoveFish();
                         break;
 
                     case CycleStep:
+                        CleanMesageString();
                         aquarium.CycleStep();
                         break;
 
@@ -82,6 +78,13 @@
 
             Console.SetCursorPosition(0, currentLineCursor);
         }
+
+        private void CleanMesageString()
+        {
+            Console.SetCursorPosition(0, MesagePositionY);
+            Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, MesagePositionY);
+        }
     }
 
     class Aquarium
@@ -91,17 +94,19 @@
 
         public void AddFish()
         {
-            int errorMesagePositionY = 4;
+            
 
             if (_fishes.Count <= _capacity)
             {
-                Console.SetCursorPosition(0, errorMesagePositionY - 1);
-                Console.WriteLine();
                 _fishes.Add(new Fish());
+
+                Console.SetCursorPosition(0, Menu.MesagePositionY);
+                Console.WriteLine();
             }
             else
             {
-                Console.SetCursorPosition(0, errorMesagePositionY);
+                Console.SetCursorPosition(0, Menu.MesagePositionY);
+                Console.WriteLine();
                 Console.WriteLine("Max auqarium capacity riched");
             }
         }
@@ -110,7 +115,8 @@
         {
             string userInput;
             int indexFromUser;
-            Console.WriteLine("Enter index to remove fish:");
+            Console.SetCursorPosition(0, Menu.MesagePositionY);
+            Console.Write("Enter index to remove fish: ");
             userInput = Console.ReadLine();
             indexFromUser = Convert.ToInt32(userInput);
 
@@ -121,6 +127,8 @@
                     _fishes.RemoveAt(i);
                 }
             }
+
+            Console.Clear();
         }
 
         public void ShowAllFishes()
@@ -134,6 +142,7 @@
             }
             else
             {
+                Console.SetCursorPosition(0, Menu.MesagePositionY);
                 Console.WriteLine("Aquarium is empty");
             }
         }
