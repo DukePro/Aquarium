@@ -11,10 +11,10 @@
 
     class Menu
     {
-        public static int MesagePositionY = 4;
         private const string FishAdd = "1";
         private const string FishRemove = "2";
-        private const string CycleStep = "3";
+        private const string RemoveAllFishes = "3";
+        private const string SkipTime = "4";
         private const string Exit = "0";
 
         public void Run()
@@ -22,39 +22,47 @@
             string userInput;
             bool isExit = false;
             int menuPositionY = 0;
-            int fishesListPositionY = 6;
+            int fishesListPositionY = 8;
 
             Aquarium aquarium = new Aquarium();
+            UiOperations uiOperations = new UiOperations();
 
             while (isExit == false)
             {
                 Console.SetCursorPosition(0, menuPositionY);
                 Console.WriteLine(FishAdd + " - Add new fish");
                 Console.WriteLine(FishRemove + " - Remove fish");
-                Console.WriteLine(CycleStep + " - Skip 1 month");
+                Console.WriteLine(RemoveAllFishes + " - Clear Aquarium");
+                Console.WriteLine(SkipTime + " - Skip 1 month");
                 Console.WriteLine(Exit + " - Exit\n");
 
                 Console.SetCursorPosition(0, fishesListPositionY);
-                CleanConsoleBelowLine();
+                uiOperations.CleanConsoleBelowLine();
                 aquarium.ShowAllFishes();
+                Console.SetCursorPosition(0, uiOperations.UserInputPositionY);
+                uiOperations.CleanInputString();
                 userInput = Console.ReadLine();
 
                 switch (userInput)
                 {
                     case FishAdd:
-                        CleanMesageString();
+                        uiOperations.CleanMesageString();
                         aquarium.AddFish();
-                        CleanMesageString();
                         break;
 
                     case FishRemove:
-                        CleanMesageString();
+                        uiOperations.CleanMesageString();
                         aquarium.RemoveFish();
                         break;
 
-                    case CycleStep:
-                        CleanMesageString();
-                        aquarium.CycleStep();
+                    case RemoveAllFishes:
+                        uiOperations.CleanMesageString();
+                        aquarium.RemoveAllFishes();
+                        break;
+
+                    case SkipTime:
+                        uiOperations.CleanMesageString();
+                        aquarium.SkipTime();
                         break;
 
                     case Exit:
@@ -63,70 +71,53 @@
                 }
             }
         }
-
-        private void CleanConsoleBelowLine()
-        {
-            int currentLineCursor = Console.CursorTop;
-
-            for (int i = currentLineCursor; i < Console.WindowHeight; i++)
-            {
-                Console.SetCursorPosition(0, i);
-                Console.Write(new string(' ', Console.WindowWidth));
-            }
-
-            Console.SetCursorPosition(0, currentLineCursor);
-        }
-
-        private void CleanMesageString()
-        {
-            Console.SetCursorPosition(0, MesagePositionY);
-            Console.Write(new string(' ', Console.WindowWidth));
-            Console.SetCursorPosition(0, MesagePositionY);
-        }
     }
 
     class Aquarium
     {
         private static int _capacity = 5;
         private List<Fish> _fishes = new List<Fish>();
+        UiOperations uiOperations = new UiOperations();
 
         public void AddFish()
         {
-            if (_fishes.Count <= _capacity)
+            if (_fishes.Count < _capacity)
             {
                 _fishes.Add(new Fish());
-
-                Console.SetCursorPosition(0, Menu.MesagePositionY);
-                Console.WriteLine();
             }
             else
             {
-                Console.SetCursorPosition(0, Menu.MesagePositionY);
-                Console.WriteLine();
+                Console.SetCursorPosition(0, uiOperations.MesagePositionY);
                 Console.WriteLine("Max auqarium capacity riched");
             }
         }
 
         public void RemoveFish()
         {
-            string userInput;
-            int indexFromUser;
-
-            Console.SetCursorPosition(0, Menu.MesagePositionY);
+            Console.SetCursorPosition(0, uiOperations.MesagePositionY);
             Console.Write("Enter index to remove fish: ");
 
-            userInput = Console.ReadLine();
-            indexFromUser = Convert.ToInt32(userInput);
+            Console.SetCursorPosition(0, uiOperations.UserInputPositionY);
+            uiOperations.CleanInputString();
+            string userInput = Console.ReadLine();
+            int indexFromUser = Convert.ToInt32(userInput);
 
             for (int i = 0; i < _fishes.Count; i++)
             {
                 if (_fishes[i].Index == indexFromUser)
                 {
                     _fishes.RemoveAt(i);
+                    uiOperations.CleanMesageString();
+                    return;
                 }
             }
 
             Console.Clear();
+        }
+
+        public void RemoveAllFishes()
+        {
+            _fishes.Clear();
         }
 
         public void ShowAllFishes()
@@ -140,8 +131,21 @@
             }
             else
             {
-                Console.SetCursorPosition(0, Menu.MesagePositionY);
+                Console.SetCursorPosition(0, uiOperations.MesagePositionY);
+                uiOperations.CleanMesageString();
                 Console.WriteLine("Aquarium is empty");
+            }
+            if (_fishes.Count < _capacity)
+            {
+                Console.SetCursorPosition(0, uiOperations.MesagePositionY - 1);
+            }
+        }
+
+        public void SkipTime()
+        {
+            foreach (Fish fish in _fishes)
+            {
+                fish.GetOld(fish);
             }
         }
 
@@ -160,14 +164,6 @@
                 Console.ResetColor();
             }
         }
-
-        public void CycleStep()
-        {
-            foreach (Fish fish in _fishes)
-            {
-                fish.GetOld(fish);
-            }
-        }
     }
 
     class Fish
@@ -175,12 +171,11 @@
         private static int _index = 0;
         private int _minAge = 0;
         private int _maxAge = 36;
-        private Random _random = new Random();
 
         public Fish()
         {
             Index = _index++;
-            Age = _random.Next(_minAge, _maxAge);
+            Age = RandomNumber.Rand.Next(_minAge, _maxAge);
             IsAlive = true;
             Colour = CreateColour();
         }
@@ -207,31 +202,66 @@
             ConsoleColor.DarkCyan
         };
 
-            return colours[_random.Next(0, colours.Length - 1)];
+            return colours[RandomNumber.Rand.Next(0, colours.Length - 1)];
         }
 
-        public void GetOld(Fish fish)
+        private void LiveOneMonth(Fish fish)
         {
-            KillFish(fish);
-            fish.Age++;
-        }
-
-        public void KillFish(Fish fish)
-        {
-            int deathProbability;
             int minDeathProbability = 1;
             int maxDeathProbability = 100;
-            int chanceToLive;
-            double ageIndex;
 
-            ageIndex = fish.Age * maxDeathProbability;
-            deathProbability = Convert.ToInt32(Math.Floor(ageIndex / _maxAge));
-            chanceToLive = _random.Next(minDeathProbability, maxDeathProbability);
+            double deathProbabilityByAge = fish.Age * maxDeathProbability;
+            int deathProbability = Convert.ToInt32(Math.Floor(deathProbabilityByAge / _maxAge));
+            int chanceToLive = RandomNumber.Rand.Next(minDeathProbability, maxDeathProbability);
 
             if (chanceToLive <= deathProbability)
             {
                 IsAlive = false;
             }
+        }
+
+        public void GetOld(Fish fish)
+        {
+            LiveOneMonth(fish);
+            fish.Age++;
+        }
+    }
+
+    class RandomNumber
+    {
+        public static Random Rand = new Random();
+    }
+
+    class UiOperations
+    {
+        public int MesagePositionY { get; private set; } = 5;
+        public int UserInputPositionY { get; private set; } = 7;
+
+        public void CleanConsoleBelowLine()
+        {
+            int currentLineCursor = Console.CursorTop;
+
+            for (int i = currentLineCursor; i < Console.WindowHeight; i++)
+            {
+                Console.SetCursorPosition(0, i);
+                Console.Write(new string(' ', Console.WindowWidth));
+            }
+
+            Console.SetCursorPosition(0, currentLineCursor);
+        }
+
+        public void CleanMesageString()
+        {
+            Console.SetCursorPosition(0, MesagePositionY);
+            Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, MesagePositionY);
+        }
+
+        public void CleanInputString()
+        {
+            Console.SetCursorPosition(0, UserInputPositionY);
+            Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, UserInputPositionY);
         }
     }
 }
