@@ -22,10 +22,8 @@
             string userInput;
             bool isExit = false;
             int menuPositionY = 0;
-            int fishesListPositionY = 8;
 
             Aquarium aquarium = new Aquarium();
-            UiOperations uiOperations = new UiOperations();
 
             while (isExit == false)
             {
@@ -36,32 +34,32 @@
                 Console.WriteLine(SkipTime + " - Skip 1 month");
                 Console.WriteLine(Exit + " - Exit\n");
 
-                Console.SetCursorPosition(0, fishesListPositionY);
-                uiOperations.CleanConsoleBelowLine();
+                UiOperations.SetCursourFishesListLine();
+                UiOperations.CleanConsoleBelowLine();
                 aquarium.ShowAllFishes();
-                Console.SetCursorPosition(0, uiOperations.UserInputPositionY);
-                uiOperations.CleanInputString();
+                UiOperations.SetCursourUserInputLine();
+                UiOperations.CleanString();
                 userInput = Console.ReadLine();
 
                 switch (userInput)
                 {
                     case FishAdd:
-                        uiOperations.CleanMesageString();
+                        UiOperations.CleanString();
                         aquarium.AddFish();
                         break;
 
                     case FishRemove:
-                        uiOperations.CleanMesageString();
+                        UiOperations.CleanString();
                         aquarium.RemoveFish();
                         break;
 
                     case RemoveAllFishes:
-                        uiOperations.CleanMesageString();
+                        UiOperations.CleanString();
                         aquarium.RemoveAllFishes();
                         break;
 
                     case SkipTime:
-                        uiOperations.CleanMesageString();
+                        UiOperations.CleanString();
                         aquarium.SkipTime();
                         break;
 
@@ -77,7 +75,6 @@
     {
         private static int _capacity = 5;
         private List<Fish> _fishes = new List<Fish>();
-        UiOperations uiOperations = new UiOperations();
 
         public void AddFish()
         {
@@ -87,18 +84,20 @@
             }
             else
             {
-                Console.SetCursorPosition(0, uiOperations.MesagePositionY);
+                UiOperations.SetCursourMessageLine();
+                UiOperations.CleanString();
                 Console.WriteLine("Max auqarium capacity riched");
             }
         }
 
         public void RemoveFish()
         {
-            Console.SetCursorPosition(0, uiOperations.MesagePositionY);
+            UiOperations.SetCursourMessageLine();
+            UiOperations.CleanString();
             Console.Write("Enter index to remove fish: ");
 
-            Console.SetCursorPosition(0, uiOperations.UserInputPositionY);
-            uiOperations.CleanInputString();
+            UiOperations.SetCursourUserInputLine();
+            UiOperations.CleanString();
             string userInput = Console.ReadLine();
             int indexFromUser = Convert.ToInt32(userInput);
 
@@ -107,7 +106,7 @@
                 if (_fishes[i].Index == indexFromUser)
                 {
                     _fishes.RemoveAt(i);
-                    uiOperations.CleanMesageString();
+                    Console.Clear();
                     return;
                 }
             }
@@ -124,20 +123,23 @@
         {
             if (_fishes.Count > 0)
             {
+                UiOperations.SetCursourFishesListLine();
+
                 foreach (Fish fish in _fishes)
                 {
                     ShowFish(fish);
                 }
             }
-            else
+            else if (_fishes.Count == 0)
             {
-                Console.SetCursorPosition(0, uiOperations.MesagePositionY);
-                uiOperations.CleanMesageString();
+                UiOperations.SetCursourMessageLine();
+                UiOperations.CleanString();
                 Console.WriteLine("Aquarium is empty");
             }
-            if (_fishes.Count < _capacity)
+            if (_fishes.Count == 1)
             {
-                Console.SetCursorPosition(0, uiOperations.MesagePositionY - 1);
+                UiOperations.SetCursourMessageLine();
+                UiOperations.CleanString();
             }
         }
 
@@ -155,14 +157,14 @@
             {
                 Console.ForegroundColor = fish.Colour;
                 Console.WriteLine($"Fish number - {fish.Index}, Age - {fish.Age}, Status - Alive");
-                Console.ResetColor();
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Gray;
                 Console.WriteLine($"Fish number - {fish.Index}, Status - Dead");
-                Console.ResetColor();
             }
+
+            Console.ResetColor();
         }
     }
 
@@ -175,9 +177,9 @@
         public Fish()
         {
             Index = _index++;
-            Age = RandomNumber.Rand.Next(_minAge, _maxAge);
+            Age = MyRandom.GetRandomNumber(_minAge, _maxAge);
             IsAlive = true;
-            Colour = CreateColour();
+            Colour = GenerateColour();
         }
 
         public int Index { get; private set; }
@@ -185,7 +187,13 @@
         public bool IsAlive { get; private set; }
         public ConsoleColor Colour { get; private set; }
 
-        private ConsoleColor CreateColour()
+        public void GetOld(Fish fish)
+        {
+            LiveOneMonth(fish);
+            fish.Age++;
+        }
+
+        private ConsoleColor GenerateColour()
         {
             ConsoleColor[] colours = new ConsoleColor[] {
             ConsoleColor.Red,
@@ -202,7 +210,7 @@
             ConsoleColor.DarkCyan
         };
 
-            return colours[RandomNumber.Rand.Next(0, colours.Length - 1)];
+            return colours[MyRandom.GetRandomNumber(0, colours.Length - 1)];
         }
 
         private void LiveOneMonth(Fish fish)
@@ -212,32 +220,28 @@
 
             double deathProbabilityByAge = fish.Age * maxDeathProbability;
             int deathProbability = Convert.ToInt32(Math.Floor(deathProbabilityByAge / _maxAge));
-            int chanceToLive = RandomNumber.Rand.Next(minDeathProbability, maxDeathProbability);
+            int chanceToLive = MyRandom.GetRandomNumber(minDeathProbability, maxDeathProbability);
 
             if (chanceToLive <= deathProbability)
             {
                 IsAlive = false;
             }
         }
+    }
 
-        public void GetOld(Fish fish)
+    class MyRandom
+    {
+        private static Random _random = new Random();
+
+        public static int GetRandomNumber(int minValue, int maxValue)
         {
-            LiveOneMonth(fish);
-            fish.Age++;
+            return _random.Next(minValue, maxValue);
         }
     }
 
-    class RandomNumber
+    static class UiOperations
     {
-        public static Random Rand = new Random();
-    }
-
-    class UiOperations
-    {
-        public int MesagePositionY { get; private set; } = 5;
-        public int UserInputPositionY { get; private set; } = 7;
-
-        public void CleanConsoleBelowLine()
+        static public void CleanConsoleBelowLine()
         {
             int currentLineCursor = Console.CursorTop;
 
@@ -250,18 +254,29 @@
             Console.SetCursorPosition(0, currentLineCursor);
         }
 
-        public void CleanMesageString()
+        static public void SetCursourMessageLine()
         {
-            Console.SetCursorPosition(0, MesagePositionY);
-            Console.Write(new string(' ', Console.WindowWidth));
-            Console.SetCursorPosition(0, MesagePositionY);
+            int mesagePositionY = 5;
+            Console.SetCursorPosition(0, mesagePositionY);
         }
 
-        public void CleanInputString()
+        static public void SetCursourUserInputLine()
         {
-            Console.SetCursorPosition(0, UserInputPositionY);
+            int userInputPositionY = 7;
+            Console.SetCursorPosition(0, userInputPositionY);
+        }
+
+        static public void SetCursourFishesListLine()
+        {
+            int fishesListPositionY = 9;
+            Console.SetCursorPosition(0, fishesListPositionY);
+        }
+        
+        static public void CleanString()
+        {
+            Console.SetCursorPosition(0, Console.CursorTop);
             Console.Write(new string(' ', Console.WindowWidth));
-            Console.SetCursorPosition(0, UserInputPositionY);
+            Console.SetCursorPosition(0, Console.CursorTop);
         }
     }
 }
