@@ -99,7 +99,19 @@
             UiOperations.SetCursourUserInputLine();
             UiOperations.CleanString();
             string userInput = Console.ReadLine();
-            int indexFromUser = Convert.ToInt32(userInput);
+            int indexFromUser;
+
+            if (int.TryParse(userInput, out indexFromUser))
+            {
+                indexFromUser = Convert.ToInt32(userInput);
+            }
+            else
+            {
+                UiOperations.SetCursourMessageLine();
+                UiOperations.CleanString();
+                Console.Write("Wrong index");
+                return;
+            }
 
             for (int i = 0; i < _fishes.Count; i++)
             {
@@ -147,7 +159,7 @@
         {
             foreach (Fish fish in _fishes)
             {
-                fish.GetOld(fish);
+                fish.Grow(fish);
             }
         }
 
@@ -187,7 +199,7 @@
         public bool IsAlive { get; private set; }
         public ConsoleColor Colour { get; private set; }
 
-        public void GetOld(Fish fish)
+        public void Grow(Fish fish)
         {
             LiveOneMonth(fish);
             fish.Age++;
@@ -219,7 +231,7 @@
             int maxDeathProbability = 100;
 
             double deathProbabilityByAge = fish.Age * maxDeathProbability;
-            int deathProbability = Convert.ToInt32(Math.Floor(deathProbabilityByAge / _maxAge));
+            int deathProbability = (int)Math.Floor(deathProbabilityByAge / _maxAge);
             int chanceToLive = MyRandom.GetRandomNumber(minDeathProbability, maxDeathProbability);
 
             if (chanceToLive <= deathProbability)
@@ -241,7 +253,7 @@
 
     static class UiOperations
     {
-        static public void CleanConsoleBelowLine()
+        public static void CleanConsoleBelowLine()
         {
             int currentLineCursor = Console.CursorTop;
 
@@ -254,25 +266,25 @@
             Console.SetCursorPosition(0, currentLineCursor);
         }
 
-        static public void SetCursourMessageLine()
+        public static void SetCursourMessageLine()
         {
             int mesagePositionY = 5;
             Console.SetCursorPosition(0, mesagePositionY);
         }
 
-        static public void SetCursourUserInputLine()
+        public static void SetCursourUserInputLine()
         {
             int userInputPositionY = 7;
             Console.SetCursorPosition(0, userInputPositionY);
         }
 
-        static public void SetCursourFishesListLine()
+        public static void SetCursourFishesListLine()
         {
             int fishesListPositionY = 9;
             Console.SetCursorPosition(0, fishesListPositionY);
         }
-        
-        static public void CleanString()
+
+        public static void CleanString()
         {
             Console.SetCursorPosition(0, Console.CursorTop);
             Console.Write(new string(' ', Console.WindowWidth));
