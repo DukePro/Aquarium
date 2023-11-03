@@ -44,22 +44,18 @@
                 switch (userInput)
                 {
                     case FishAdd:
-                        UiOperations.CleanString();
                         aquarium.AddFish();
                         break;
 
                     case FishRemove:
-                        UiOperations.CleanString();
                         aquarium.RemoveFish();
                         break;
 
                     case RemoveAllFishes:
-                        UiOperations.CleanString();
                         aquarium.RemoveAllFishes();
                         break;
 
                     case SkipTime:
-                        UiOperations.CleanString();
                         aquarium.SkipTime();
                         break;
 
@@ -73,7 +69,7 @@
 
     class Aquarium
     {
-        private static int _capacity = 5;
+        private int _capacity = 5;
         private List<Fish> _fishes = new List<Fish>();
 
         public void AddFish()
@@ -101,11 +97,7 @@
             string userInput = Console.ReadLine();
             int indexFromUser;
 
-            if (int.TryParse(userInput, out indexFromUser))
-            {
-                indexFromUser = Convert.ToInt32(userInput);
-            }
-            else
+            if (!int.TryParse(userInput, out indexFromUser))
             {
                 UiOperations.SetCursourMessageLine();
                 UiOperations.CleanString();
@@ -115,7 +107,7 @@
 
             for (int i = 0; i < _fishes.Count; i++)
             {
-                if (_fishes[i].Index == indexFromUser)
+                if (_fishes[i].Id == indexFromUser)
                 {
                     _fishes.RemoveAt(i);
                     Console.Clear();
@@ -148,6 +140,7 @@
                 UiOperations.CleanString();
                 Console.WriteLine("Aquarium is empty");
             }
+
             if (_fishes.Count == 1)
             {
                 UiOperations.SetCursourMessageLine();
@@ -159,7 +152,7 @@
         {
             foreach (Fish fish in _fishes)
             {
-                fish.Grow(fish);
+                fish.Grow();
             }
         }
 
@@ -168,12 +161,12 @@
             if (fish.IsAlive)
             {
                 Console.ForegroundColor = fish.Colour;
-                Console.WriteLine($"Fish number - {fish.Index}, Age - {fish.Age}, Status - Alive");
+                Console.WriteLine($"Fish number - {fish.Id}, Age - {fish.Age}, Status - Alive");
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Gray;
-                Console.WriteLine($"Fish number - {fish.Index}, Status - Dead");
+                Console.WriteLine($"Fish number - {fish.Id}, Status - Dead");
             }
 
             Console.ResetColor();
@@ -182,27 +175,42 @@
 
     class Fish
     {
-        private static int _index = 0;
+        private static int _id = 0;
         private int _minAge = 0;
         private int _maxAge = 36;
 
         public Fish()
         {
-            Index = _index++;
-            Age = MyRandom.GetRandomNumber(_minAge, _maxAge);
+            Id = _id++;
+            Age = Utils.GetRandomNumber(_minAge, _maxAge);
             IsAlive = true;
             Colour = GenerateColour();
         }
 
-        public int Index { get; private set; }
+        public int Id { get; private set; }
         public int Age { get; private set; }
         public bool IsAlive { get; private set; }
         public ConsoleColor Colour { get; private set; }
 
-        public void Grow(Fish fish)
+        public void Grow()
         {
-            LiveOneMonth(fish);
-            fish.Age++;
+            LiveOneMonth();
+            Age++;
+        }
+
+        private void LiveOneMonth()
+        {
+            int minDeathProbability = 1;
+            int maxDeathProbability = 100;
+
+            double deathProbabilityByAge = Age * maxDeathProbability;
+            int deathProbability = (int)Math.Floor(deathProbabilityByAge / _maxAge);
+            int chanceToLive = Utils.GetRandomNumber(minDeathProbability, maxDeathProbability);
+
+            if (chanceToLive <= deathProbability)
+            {
+                IsAlive = false;
+            }
         }
 
         private ConsoleColor GenerateColour()
@@ -222,32 +230,17 @@
             ConsoleColor.DarkCyan
         };
 
-            return colours[MyRandom.GetRandomNumber(0, colours.Length - 1)];
-        }
-
-        private void LiveOneMonth(Fish fish)
-        {
-            int minDeathProbability = 1;
-            int maxDeathProbability = 100;
-
-            double deathProbabilityByAge = fish.Age * maxDeathProbability;
-            int deathProbability = (int)Math.Floor(deathProbabilityByAge / _maxAge);
-            int chanceToLive = MyRandom.GetRandomNumber(minDeathProbability, maxDeathProbability);
-
-            if (chanceToLive <= deathProbability)
-            {
-                IsAlive = false;
-            }
+            return colours[Utils.GetRandomNumber(0, colours.Length - 1)];
         }
     }
 
-    class MyRandom
+    class Utils
     {
-        private static Random _random = new Random();
+        private static Random s_random = new Random();
 
         public static int GetRandomNumber(int minValue, int maxValue)
         {
-            return _random.Next(minValue, maxValue);
+            return s_random.Next(minValue, maxValue);
         }
     }
 
