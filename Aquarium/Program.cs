@@ -34,10 +34,10 @@
                 Console.WriteLine(SkipTime + " - Skip 1 month");
                 Console.WriteLine(Exit + " - Exit\n");
 
-                UiOperations.SetCursourFishesListLine();
+                UiOperations.MoveCursourFishesListLine();
                 UiOperations.CleanConsoleBelowLine();
                 aquarium.ShowAllFishes();
-                UiOperations.SetCursourUserInputLine();
+                UiOperations.MoveCursourUserInputLine();
                 UiOperations.CleanString();
                 userInput = Console.ReadLine();
 
@@ -80,7 +80,7 @@
             }
             else
             {
-                UiOperations.SetCursourMessageLine();
+                UiOperations.MoveCursourMessageLine();
                 UiOperations.CleanString();
                 Console.WriteLine("Max auqarium capacity riched");
             }
@@ -88,18 +88,18 @@
 
         public void RemoveFish()
         {
-            UiOperations.SetCursourMessageLine();
+            UiOperations.MoveCursourMessageLine();
             UiOperations.CleanString();
             Console.Write("Enter index to remove fish: ");
 
-            UiOperations.SetCursourUserInputLine();
+            UiOperations.MoveCursourUserInputLine();
             UiOperations.CleanString();
             string userInput = Console.ReadLine();
             int indexFromUser;
 
-            if (!int.TryParse(userInput, out indexFromUser))
+            if (int.TryParse(userInput, out indexFromUser) == false)
             {
-                UiOperations.SetCursourMessageLine();
+                UiOperations.MoveCursourMessageLine();
                 UiOperations.CleanString();
                 Console.Write("Wrong index");
                 return;
@@ -127,7 +127,7 @@
         {
             if (_fishes.Count > 0)
             {
-                UiOperations.SetCursourFishesListLine();
+                UiOperations.MoveCursourFishesListLine();
 
                 foreach (Fish fish in _fishes)
                 {
@@ -136,14 +136,14 @@
             }
             else if (_fishes.Count == 0)
             {
-                UiOperations.SetCursourMessageLine();
+                UiOperations.MoveCursourMessageLine();
                 UiOperations.CleanString();
                 Console.WriteLine("Aquarium is empty");
             }
 
             if (_fishes.Count == 1)
             {
-                UiOperations.SetCursourMessageLine();
+                UiOperations.MoveCursourMessageLine();
                 UiOperations.CleanString();
             }
         }
@@ -259,19 +259,19 @@
             Console.SetCursorPosition(0, currentLineCursor);
         }
 
-        public static void SetCursourMessageLine()
+        public static void MoveCursourMessageLine()
         {
             int mesagePositionY = 5;
             Console.SetCursorPosition(0, mesagePositionY);
         }
 
-        public static void SetCursourUserInputLine()
+        public static void MoveCursourUserInputLine()
         {
             int userInputPositionY = 7;
             Console.SetCursorPosition(0, userInputPositionY);
         }
 
-        public static void SetCursourFishesListLine()
+        public static void MoveCursourFishesListLine()
         {
             int fishesListPositionY = 9;
             Console.SetCursorPosition(0, fishesListPositionY);
