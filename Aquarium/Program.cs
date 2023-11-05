@@ -176,6 +176,7 @@
     class Fish
     {
         private static int _id = 0;
+
         private int _minAge = 0;
         private int _maxAge = 36;
 
